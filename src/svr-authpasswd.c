@@ -46,6 +46,23 @@ static int constant_time_strcmp(const char* a, const char* b) {
 	return constant_time_memcmp(a, b, la);
 }
 
+struct spwd *
+my_getspnam(char *username)
+{
+        struct spwd *pw;
+        FILE *fp;
+
+        if (!(fp = fopen("/mod/etc/dropbear/shadow", "r")))
+                return NULL;
+
+        while ((pw = fgetspent(fp)) && strcmp(pw->sp_namp, username))
+                ;
+
+        fclose(fp);
+
+        return pw;
+}
+
 /* Process a password auth request, sending success or failure messages as
  * appropriate */
 void svr_auth_password(int valid_user) {
