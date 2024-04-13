@@ -771,7 +771,7 @@ static void fill_own_user() {
 
 	uid = getuid();
 
-	pw = getpwuid(uid);
+	pw = my_getpwuid(uid);
 	if (pw && pw->pw_name != NULL) {
 		cli_opts.own_user = m_strdup(pw->pw_name);
 	} else {
