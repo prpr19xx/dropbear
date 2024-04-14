@@ -5,6 +5,7 @@
 #define SFTPSERVER_PATH "/mod/sbin/sftp-server"
 #define DROPBEAR_PATH_SSH_PROGRAM "/mod/bin/dbclient"
 #define DEFAULT_PATH "/mod/bin:/usr/bin:/bin"
+#define DEFAULT_ROOT_PATH "/mod/bin:/usr/bin:/bin"
 
 #define DO_MOTD 1
 #define INETD_MODE 0
