@@ -260,11 +260,11 @@ static FILE* open_known_hosts_file(int * readonly)
 	char * filename = NULL;
 	char * homedir = NULL;
 	
-	homedir = getenv("HOME");
+	/*homedir = getenv("HOME");*/
 
 	if (!homedir) {
 		struct passwd * pw = NULL;
-		pw = getpwuid(getuid());
+		pw = my_getpwuid(getuid());
 		if (pw) {
 			homedir = pw->pw_dir;
 		}
