@@ -53,9 +53,6 @@ void ignore_recv_response(void);
 
 void update_channel_prio(void);
 
-struct passwd *my_getpwnam(char *);
-struct passwd *my_getpwuid(uid_t);
-
 const char* get_user_shell(void);
 void fill_passwd(const char* username);
 

@@ -726,37 +726,50 @@ void update_channel_prio() {
 	}
 }
 
-struct passwd *
-my_getpwuid(uid_t uid)
+struct passwd *my_getpwuid(uid_t uid)
 {
-      struct passwd *pw;
-      FILE *fp;
+	struct passwd *pw;
+	FILE *fp;
 
-      if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
-              return NULL;
+	if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
+		return NULL;
 
-      while ((pw = fgetpwent(fp)) && pw->pw_uid != uid)
-              ;
+	while ((pw = fgetpwent(fp)) && pw->pw_uid != uid)
+		;
 
-      fclose(fp);
+	fclose(fp);
 
-      return pw;
+	return pw;
 }
 
-struct passwd *
-my_getpwnam(char *username)
+struct passwd *my_getpwnam(const char *username)
 {
-      struct passwd *pw;
-      FILE *fp;
+	struct passwd *pw;
+	FILE *fp;
 
-      if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
-              return NULL;
+	if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
+		return NULL;
 
-      while ((pw = fgetpwent(fp)) && strcmp(pw->pw_name, username))
-              ;
+	while ((pw = fgetpwent(fp)) && strcmp(pw->pw_name, username))
+		;
 
-      fclose(fp);
+	fclose(fp);
 
-      return pw;
+	return pw;
 }
 
+struct spwd *my_getspnam(const char *username)
+{
+	struct spwd *pw;
+	FILE *fp;
+
+	if (!(fp = fopen("/mod/etc/dropbear/shadow", "r")))
+		return NULL;
+
+	while ((pw = fgetspent(fp)) && strcmp(pw->sp_namp, username))
+		;
+
+	fclose(fp);
+
+	return pw;
+}
