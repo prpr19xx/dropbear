@@ -115,5 +115,8 @@ int scp_main(int argc, char ** argv);
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+struct passwd *my_getpwuid(uid_t uid);
+struct passwd *my_getpwnam(const char *username);
+struct spwd *my_getspnam(const char *username);
 
 #endif /* DROPBEAR_DBUTIL_H_ */
