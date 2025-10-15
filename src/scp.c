@@ -199,7 +199,7 @@ do_cmd(char *host, char *remuser, char *cmd, int *fdin, int *fdout)
 	 * Reserve two descriptors so that the real pipes won't get
 	 * descriptors 0 and 1 because that will screw up dup2 below.
 	 */
-	pipe(reserved);
+	(void) !pipe(reserved);
 
 	/* Create a socket pair for communicating with ssh. */
 	if (pipe(pin) < 0)
@@ -601,8 +601,7 @@ source(int argc, char **argv)
 	struct stat stb;
 	static BUF buffer;
 	BUF *bp;
-	off_t i, amt, statbytes;
-	size_t result;
+	size_t i, amt, statbytes, result;
 	int fd = -1, haderr, indx;
 	char *last, *name, buf[2048];
 	int len;
@@ -655,9 +654,9 @@ syserr:			run_err("%s: %s", name, strerror(errno));
 				goto next;
 		}
 #define	FILEMODEMASK	(S_ISUID|S_ISGID|S_IRWXU|S_IRWXG|S_IRWXO)
-		snprintf(buf, sizeof buf, "C%04o %lld %s\n",
+		snprintf(buf, sizeof buf, "C%04o %llu %s\n",
 		    (u_int) (stb.st_mode & FILEMODEMASK),
-		    (long long)stb.st_size, last);
+		    (unsigned long long) stb.st_size, last);
 		if (verbose_mode) {
 			fprintf(stderr, "Sending file modes: %s", buf);
 		}
@@ -673,13 +672,13 @@ next:			if (fd != -1) {
 		}
 #ifdef PROGRESS_METER
 		if (showprogress)
-			start_progress_meter(curfile, stb.st_size, &statbytes);
+			start_progress_meter(curfile, (size_t) stb.st_size, &statbytes);
 #endif
 		/* Keep writing after an error so that we stay sync'd up. */
-		for (haderr = i = 0; i < stb.st_size; i += bp->cnt) {
+		for (haderr = i = 0; i < (size_t) stb.st_size; i += bp->cnt) {
 			amt = bp->cnt;
-			if (i + amt > stb.st_size)
-				amt = stb.st_size - i;
+			if (i + amt > (size_t) stb.st_size)
+				amt = (size_t) stb.st_size - i;
 			if (!haderr) {
 				result = atomicio(read, fd, bp->buf, amt);
 				if (result != amt)
@@ -1236,6 +1235,7 @@ allocbuf(BUF *bp, int fd, int blksize)
 		size = blksize;
 #else /* HAVE_STRUCT_STAT_ST_BLKSIZE */
 	size = blksize;
+	(void) fd;
 #endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
 	if (bp->cnt >= size)
 		return (bp);
@@ -1252,7 +1252,7 @@ void
 lostconn(int signo)
 {
 	if (!iamremote)
-		write(STDERR_FILENO, "lost connection\n", 16);
+		(void) !write(STDERR_FILENO, "lost connection\n", 16);
 	if (signo)
 		_exit(1);
 	else

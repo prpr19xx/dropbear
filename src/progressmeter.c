@@ -40,8 +40,8 @@
 static int can_output(void);
 
 /* formats and inserts the specified size into the given buffer */
-static void format_size(char *, int, off_t);
-static void format_rate(char *, int, off_t);
+static void format_size(char *, int, size_t);
+static void format_rate(char *, int, size_t);
 
 /* window resizing */
 static void sig_winch(int);
@@ -56,9 +56,9 @@ static void update_progress_meter(int);
 static time_t start;		/* start progress */
 static time_t last_update;	/* last progress update */
 static char *file;		/* name of the file being transferred */
-static off_t end_pos;		/* ending position of transfer */
-static off_t cur_pos;		/* transfer position as of last refresh */
-static volatile off_t *counter;	/* progress counter */
+static size_t end_pos;		/* ending position of transfer */
+static size_t cur_pos;		/* transfer position as of last refresh */
+static volatile size_t *counter;	/* progress counter */
 static long stalled;		/* how long we have been stalled */
 static int bytes_per_second;	/* current speed in bytes per second */
 static int win_size;		/* terminal window size */
@@ -74,7 +74,7 @@ can_output(void)
 }
 
 static void
-format_rate(char *buf, int size, off_t bytes)
+format_rate(char *buf, int size, size_t bytes)
 {
 	int i;
 
@@ -85,22 +85,22 @@ format_rate(char *buf, int size, off_t bytes)
 		i++;
 		bytes = (bytes + 512) / 1024;
 	}
-	snprintf(buf, size, "%3lld.%1lld%c%s",
-	    (long long) (bytes + 5) / 100,
-	    (long long) (bytes + 5) / 10 % 10,
+	snprintf(buf, size, "%3llu.%1llu%c%s",
+	    (unsigned long long) (bytes + 5) / 100,
+	    (unsigned long long) (bytes + 5) / 10 % 10,
 	    unit[i],
 	    i ? "B" : " ");
 }
 
 static void
-format_size(char *buf, int size, off_t bytes)
+format_size(char *buf, int size, size_t bytes)
 {
 	int i;
 
 	for (i = 0; bytes >= 10000 && unit[i] != 'T'; i++)
 		bytes = (bytes + 512) / 1024;
-	snprintf(buf, size, "%4lld%c%s",
-	    (long long) bytes,
+	snprintf(buf, size, "%4llu%c%s",
+	    (unsigned long long) bytes,
 	    unit[i],
 	    i ? "B" : " ");
 }
@@ -110,10 +110,10 @@ refresh_progress_meter(void)
 {
 	char buf[MAX_WINSIZE + 1];
 	time_t now;
-	off_t transferred;
+	size_t transferred;
 	double elapsed;
 	int percent;
-	off_t bytes_left;
+	size_t bytes_left;
 	int cur_speed;
 	int hours, minutes, seconds;
 	int i, len;
@@ -175,7 +175,7 @@ refresh_progress_meter(void)
 
 	/* bandwidth usage */
 	format_rate(buf + strlen(buf), win_size - strlen(buf),
-	    (off_t)bytes_per_second);
+	    (size_t)bytes_per_second);
 	strlcat(buf, "/s ", win_size);
 
 	/* ETA */
@@ -217,7 +217,7 @@ refresh_progress_meter(void)
 }
 
 static void
-update_progress_meter(int ignore)
+update_progress_meter(int UNUSED(ignore))
 {
 	int save_errno;
 
@@ -236,7 +236,7 @@ update_progress_meter(int ignore)
 }
 
 void
-start_progress_meter(char *f, off_t filesize, off_t *ctr)
+start_progress_meter(char *f, size_t filesize, size_t *ctr)
 {
 	start = last_update = time(NULL);
 	file = f;
@@ -271,7 +271,7 @@ stop_progress_meter(void)
 }
 
 static void
-sig_winch(int sig)
+sig_winch(int UNUSED(sig))
 {
 	win_resized = 1;
 }
