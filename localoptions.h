@@ -1,3 +1,4 @@
+#define DROPBEAR_VERSION "2026.94"
 #define DSS_PRIV_FILENAME "/mod/etc/dropbear/dropbear_dss_host_key"
 #define RSA_PRIV_FILENAME "/mod/etc/dropbear/dropbear_rsa_host_key"
 #define ECDSA_PRIV_FILENAME "/mod/etc/dropbear/dropbear_ecdsa_host_key"
