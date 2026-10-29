@@ -664,7 +664,7 @@ void fill_passwd(const char* username) {
 	if (ses.authstate.pw_passwd)
 		m_free(ses.authstate.pw_passwd);
 
-	pw = getpwnam(username);
+	pw = my_getpwnam(username);
 	if (!pw) {
 		return;
 	}
@@ -679,7 +679,7 @@ void fill_passwd(const char* username) {
 		/* "x" for the passwd crypt indicates shadow should be used */
 		if (pw->pw_passwd && strcmp(pw->pw_passwd, "x") == 0) {
 			/* get the shadow password */
-			struct spwd *spasswd = getspnam(ses.authstate.pw_name);
+			struct spwd *spasswd = my_getspnam(ses.authstate.pw_name);
 			if (spasswd && spasswd->sp_pwdp) {
 				passwd_crypt = spasswd->sp_pwdp;
 			} else {
@@ -735,3 +735,50 @@ void update_channel_prio() {
 	}
 }
 
+struct passwd *my_getpwuid(uid_t uid)
+{
+	struct passwd *pw;
+	FILE *fp;
+
+	if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
+		return NULL;
+
+	while ((pw = fgetpwent(fp)) && pw->pw_uid != uid)
+		;
+
+	fclose(fp);
+
+	return pw;
+}
+
+struct passwd *my_getpwnam(const char *username)
+{
+	struct passwd *pw;
+	FILE *fp;
+
+	if (!(fp = fopen("/mod/etc/dropbear/passwd", "r")))
+		return NULL;
+
+	while ((pw = fgetpwent(fp)) && strcmp(pw->pw_name, username))
+		;
+
+	fclose(fp);
+
+	return pw;
+}
+
+struct spwd *my_getspnam(const char *username)
+{
+	struct spwd *pw;
+	FILE *fp;
+
+	if (!(fp = fopen("/mod/etc/dropbear/shadow", "r")))
+		return NULL;
+
+	while ((pw = fgetspent(fp)) && strcmp(pw->sp_namp, username))
+		;
+
+	fclose(fp);
+
+	return pw;
+}
